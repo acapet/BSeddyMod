@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 #old_epoch = '0000-12-31T00:00:00'
 #mdates.set_epoch(old_epoch)
 
+import argparse
 
 from copy import copy
 from glob import glob
@@ -27,6 +28,14 @@ from emTools import fillmask_kdtree, getncvcm
 from gradient04 import gradient
 from BS_EDDIES_getcubes import get_pm_pn
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-y","--year", type=int, help="start year")
+parser.add_argument("-m","--month", type=int, help="start month (1st)")
+
+args = parser.parse_args()
+runyear  = args.year
+runmonth = args.month
 
 EARTH_R = 6370997.0  # Same as py-eddy-tracker `grid.py`
 
@@ -94,18 +103,14 @@ if __name__ == "__main__":
 
     start_date, end_date = '201401', '201402'
 
-    #directory = "/marula/emason/BlackSea/"
-    #directory = "/scratch/ulg/mast/emason/daily_MYP_input_files/"
-    #directory = "/scratch/ulg/mast/emason/daily_MYP_input_files/Daily_model_files/"
     directory = "/scratch/ulg/mast/acapet/Compout/cubes/"
 
     BS_compo_files = (
-        "BlackSea_ACYC_composites_??????.nc"
+        "BlackSea_ACYC_composites_"+str(runyear)+"??.nc"
         if ACYC
-        else "BlackSea_CCYC_composites_??????.nc"
+        else "BlackSea_CCYC_composites_"+str(runyear)+"??.nc"
     )
 
-    print(directory + BS_compo_files) # AC delme
     BS_compo_files = sorted(glob(directory + BS_compo_files))
 
     biovar2Ddiaglist=['bac_oxygenconsumptionI', 'ZooRespI', 'NPPOI', 'OXIDATIONBYDOXI']
@@ -409,7 +414,6 @@ if __name__ == "__main__":
                 unlimited_dims="index",
             )
             
-
             grid = Grid(
                 ds_daily,
                 coords={"Z": {"center": "depth"}, "Y": {"center": "norm_eddy_radius"}},
