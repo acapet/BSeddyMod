@@ -84,9 +84,6 @@ def extended(ax, pt, x, y, **args):
     ax.set_ylim(ylim)
     return ax, x_ext, y_ext
 
-
-
-
 if __name__ == "__main__":
 
     plt.close("all")
@@ -129,36 +126,20 @@ if __name__ == "__main__":
 
     index_count = 0
 
-    print(BS_compo_files[0]) #AC delme
     start_i, stop_i = [i for i, f in enumerate(BS_compo_files) if start_date in f or end_date in f]
     BS_compo_files = BS_compo_files[start_i:stop_i + 1]
     
     savefile_z = "Z_slices/BS_Z_slices_%s_track-%s_%s.nc"  # CYC TRACK YYYYMMDD
     savefile_rho = "RHO_slices/BS_RHO_slices_%s_track-%s_%s.nc"  # CYC TRACK YYYYMMDD
-
-    #region_mask = xr.open_dataset('/home/emason/Downloads/region_O2_smooth.nc')
-    #region_mask = xr.open_dataset('/home/ulg/mast/emason/code_BS/region_O2_smooth.nc')
-    
     region_mask = xr.open_dataset('/home/ulg/mast/acapet/Evan/region_O2_smooth.nc')
-    #depth_mask = xr.open_dataset(directory + "/bathy_meter.nc")
-    #depth_mask = xr.open_dataset('/home/ulg/mast/emason/code_BS/bathy_meter.nc')
     depth_mask = xr.open_dataset('/scratch/ulg/mast/emason/daily_MYP_input_files/bathy_meter.nc')
 
-#    cmap = copy(plt.cm.get_cmap("gist_earth_r"))
-#    cmap.set_bad("darkslategray", alpha=None)
-#    cmap_banded = getncvcm("banded")
-    
     fig = plt.figure(1)
 
     for i, BS_file in enumerate(BS_compo_files):
 
         print("####", BS_file)
-
         ds = xr.open_dataset(BS_file)
-
-        # Debugging
-        #ds = ds.where(ds.track == 224, drop=True)
-        #print('Remove me when debugged ******************************************')
 
         if not i:
             x, y = meshgrid(ds.x.values, ds.y.values)
@@ -189,8 +170,6 @@ if __name__ == "__main__":
                              'cubearray'   : ma.zeros((mask.shape[1:])),
                              'cubearrayP'  : ma.zeros((mask.shape[1:]))
                              }
-            # dox                    = ma.zeros((mask.shape))
-            # doxP                   = ma.zeros((mask.shape))
 
         for tind, the_day in enumerate(ds.time):
 
@@ -236,14 +215,7 @@ if __name__ == "__main__":
 
             ax = fig.add_subplot(111)
 
-            #cb = ax.pcolormesh(x, y, topo, cmap=cmap, shading="auto")
-            topo200 = ax.contour(
-                x, y, topo, [200], #colors="darkslategray", linewidths=1
-            )
-            #sasa
-            #ax[0, 0].contour(
-            #    x, y, ds["VORT"][tind, 2], 10, colors="w", linewidths=0.5
-            #)
+            topo200 = ax.contour( x, y, topo, [200] )
             tnearest = topo200.find_nearest_contour(cx, cy, indices=None, pixel=False)
 
             x_short = linspace(0, tnearest[3])
@@ -258,16 +230,12 @@ if __name__ == "__main__":
                 lw=2,
                 label="extended",
             )
-            #ax[0, 0].plot(x_short, y_short, color="orangered", lw=2, label="short")
             x_ext = linspace(x_ext.min(), x_ext.max(), ds.x.size)
             y_ext = linspace(y_ext.min(), y_ext.max(), ds.x.size)
-            # ax[0, 0].scatter(tnearest[3], tnearest[4], s=100, c='steelblue', marker='X', zorder=3)
 
             ax.clear()
             plt.clf()
-            #plt.close('all')
-            #plt.close(fig)
-            
+
             # Z LOOP <BEG>
             for zi, z in enumerate(ds.z):
 
@@ -385,7 +353,6 @@ if __name__ == "__main__":
             norm_eddy_radius, depth = (linspace(-pt, pt, x_ext.size), ds.z)
 
             dax = ["index", "norm_eddy_radius", "depth"]
-
             # print('---- set Dataset %s' % yyyymmdd)
 
             data_vars_dic = {
@@ -422,7 +389,6 @@ if __name__ == "__main__":
                 data_vars_dic.update({ vvv      : (("index", "norm_eddy_radius"), [biodic[vvv]['slicearray' ]]),
                                        vvv+'_P' : (("index", "norm_eddy_radius"), [biodic[vvv]['slicearrayP']])})
 
-#            print(data_vars_dic)
 
             ds_daily = xr.Dataset(
                 data_vars=data_vars_dic,
@@ -437,7 +403,7 @@ if __name__ == "__main__":
                     ycoord=(["norm_eddy_radius"], y_ext.astype(float32)),
                 )
             )
-            #sasa
+
             ds_daily.transpose("index", "depth", "norm_eddy_radius").to_netcdf(
                 savedir + savefile_z % (cyc, str(track.values).zfill(4), yyyymmdd_str),
                 unlimited_dims="index",
@@ -466,7 +432,6 @@ if __name__ == "__main__":
             for vvv in biovar3Ddiaglist + biovar3Dptrclist:
                 biodic[vvv].update({'onrho'  : transform(grid, ds_daily, vvv , target_rho_levels),
                                     'onrhoP' : transform(grid, ds_daily, vvv+'_P' , target_rho_levels)})
-            #grid.close()
 
             listof_onrhos = [vort_on_rho,
                 rhoP_on_rho,
@@ -510,9 +475,7 @@ if __name__ == "__main__":
             
             index_count += 1
 
-
             if make_figure:
-
                 DOX_plot = dox_on_rho.plot(
                     ax=ax[0, 1], x="norm_eddy_radius", yincrease=False, #cmap=cmap_banded
                 )
@@ -529,28 +492,4 @@ if __name__ == "__main__":
 
                 fig.savefig("rho_levels.png", dpi=300, bbox_inches="tight")
 
-                plt.show()
-
-            """
-            #grid = Grid(ds, coords={'Z':{'center':'z', 'outer':'zc'}}, periodic=False)
-            
-            
-            rho_target = linspace(0, 80, 21)
-            
-            ds['dox_outer'] = grid.interp(ds.rho, 'Z', boundary='fill')
-            
-            phi_transformed_cons = grid.transform(ds.phi,
-                                                  'Z',
-                                                  theta_target,
-                                                  method='conservative',
-                                                  target_data=ds.dox)
-            
-            
-            sasa
-            
-            
-            plt.colorbar(cb)
-            plt.show()
-            """ 
-            
-            
+                plt.show()           
