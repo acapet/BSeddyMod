@@ -192,14 +192,11 @@ def compute_scale_and_offset(dmin, dmax, n):
     add_offset = dmin + 2 ** (n - 1) * scale_factor
     return (scale_factor, add_offset)
 
-
 def pack_value(unpacked_value, scale_factor, add_offset):
     return floor((unpacked_value - add_offset) / scale_factor)
 
-
 def unpack_value(packed_value, scale_factor, add_offset):
     return packed_value * scale_factor + add_offset
-
 
 def create_nc(
     nc,
@@ -698,18 +695,13 @@ def create_nc(
     
     return
 
-
-
-
 def non_time_coords(ds):
     """https://github.com/pydata/xarray/issues/1385"""
     return [v for v in ds.data_vars if "time" not in ds[v].dims]
 
-
 def drop_non_essential_vars_pop(ds):
     """https://github.com/pydata/xarray/issues/1385"""
     return ds.drop(non_time_coords(ds))
-
 
 def get_pm_pn(lon, lat):
     """"""
@@ -738,7 +730,6 @@ def get_pm_pn(lon, lat):
     pn[1:-1] = haversine_dist(lonv[:-1], latv[:-1], lonv[1:], latv[1:])
     pn[0], pn[-1] = pn[1], pn[-2]
     return 1.0 / pm, 1.0 / pn
-
 
 def ertelpv(u, v, rho, f, pm, pn, dz_r=None, rho0=1027.4):
     """
@@ -856,7 +847,6 @@ def ertelpv(u, v, rho, f, pm, pn, dz_r=None, rho0=1027.4):
     lbd[1:, 1:-1, 1:-1] = evaluate("(-pvi + pvj + pvk) / rho0")
     return ma.masked_where(lbd == nan, lbd)
 
-
 def fill_nans(x):
     """"""
     x = atleast_2d(x)
@@ -873,7 +863,6 @@ def fill_nans(x):
                 return x
     else:
         return x
-
 
 def get_eddy_recarray(etrk):  # , ncyc):
     """
@@ -968,7 +957,6 @@ def get_eddy_recarray(etrk):  # , ncyc):
         cntr_observation_list,
     )
 
-
 def get_restart_index_and_clip(sorted_eddy_observation_list, restart_date):
     """
     Find index for restart and trim list accordingly
@@ -982,18 +970,15 @@ def get_restart_index_and_clip(sorted_eddy_observation_list, restart_date):
         restart_date_i += 1
     return sorted_eddy_observation_list[restart_date_i:], restart_date_i
 
-
 def interp_midi(tri, data, interpolator, xcoords, ycoords, fill_value=nan):
     """"""
     interp = interpolator(tri, data.ravel(), fill_value=fill_value)
     return interp(xcoords, ycoords)  # [::-1]
 
-
 def interp_midi_mask(tri, data, interpolator, xcoords, ycoords):
     """"""
     interp = interpolator(tri, data.ravel())
     return interp(xcoords, ycoords)  # [::-1]
-
 
 def MP_process_eddies(eddy_iter):
     """
@@ -1688,21 +1673,14 @@ if __name__ == "__main__":
         lat1d.min(),
         lat1d.max(),
     )
-    # sasa
 
-    # start_date, end_date = (2000, 1, 1), (2000, 2, 28)
-    # start_date, end_date = (2015, 1, 1), (2015, 12, 31)
     start_date, end_date = (runyear, runmonth,1), (runyear, 12, 31)
-    # start_date, end_date = (2012, 1, 1), (2014, 12, 31)
-    # start_date, end_date = (2018, 10, 1), (2018, 12, 31)
 
     # assert start_date[-1] == 1, "It's better to start on first day of month"
 
     the_save_file = (
         "BlackSea_ACYC_composites_%s.nc" if ACYC else "BlackSea_CCYC_composites_%s.nc"
     )
-
-    #                      'sossheig', 'somld_bs', 'soccc', 'vorho')
 
     m1_radius = 1.75  # 1.25
     tree_radius = 2.5  # Initially used 1
@@ -2433,39 +2411,6 @@ if __name__ == "__main__":
                     model_xarr[fullstringP]                                 -= gaussian_with_nans(ma.masked_invalid(model_xarr[fullstring].values),sigma_lo,mode="reflect")
                     model_xarr[fullstringP].values[BlackSea_mask3d[0] == 0]  = nan
 
-#                # BIO 2D DIAG (4 vars : bac_oxygenconsumptionI, ZooRespI, NPPOI, OXIDATIONBYDOXI)
-#                model_xarr["BS_bac_oxygenconsumptionI_full" ].values[BlackSea_mask3d[0] == 0] = nan
-#                model_xarr["BS_bac_oxygenconsumptionI_full" ][:] = fillmask_kdtree(model_xarr["BS_bac_oxygenconsumptionI_full"].values,bac_oxygenconsumptionI != 0,weights=k_wghts)
-#                model_xarr["BS_bac_oxygenconsumptionIP_full"]    = model_xarr["BS_bac_oxygenconsumptionI_full"].values.copy()
-#                model_xarr["BS_bac_oxygenconsumptionIP_full"]   -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_bac_oxygenconsumptionI_full"].values),sigma_lo,mode="reflect")
-#                model_xarr["BS_bac_oxygenconsumptionIP_full"].values[BlackSea_mask3d[0] == 0] = nan
-                
-#                model_xarr["BS_ZooRespI_full"               ].values[BlackSea_mask3d[0] == 0] = nan
-#                model_xarr["BS_ZooRespI_full"               ][:]                    = fillmask_kdtree(model_xarr["BS_ZooRespI_full"].values,ZooRespI != 0,weights=k_wghts)
-#                model_xarr["BS_ZooRespIP_full"              ]    = model_xarr["BS_ZooRespI_full"].values.copy()
-#                model_xarr["BS_ZooRespIP_full"              ]   -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_ZooRespI_full"].values),sigma_lo,mode="reflect")
-#                model_xarr["BS_ZooRespIP_full"              ].values[BlackSea_mask3d[0] == 0] = nan
-                
-#                model_xarr["BS_NPPOI_full"                  ].values[BlackSea_mask3d[0] == 0]       = nan
-#                model_xarr["BS_NPPOI_full"                  ][:]                       = fillmask_kdtree(model_xarr["BS_NPPOI_full"   ].values,NPPOI    != 0,weights=k_wghts)
-#                model_xarr["BS_NPPOIP_full"                 ]    = model_xarr["BS_NPPOI_full"].values.copy()
-#                model_xarr["BS_NPPOIP_full"                 ]   -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_NPPOI_full"].values),sigma_lo,mode="reflect")
-#                model_xarr["BS_NPPOIP_full"                 ].values[BlackSea_mask3d[0] == 0] = nan
-                
-#                model_xarr["BS_OXIDATIONBYDOXI_full" ].values                            = fillmask_kdtree(model_xarr["BS_OXIDATIONBYDOXI_full"].values,OXIDATIONBYDOXI != 0,weights=k_wghts)
-#                model_xarr["BS_OXIDATIONBYDOXI_full" ].values[BlackSea_mask3d[0] == 0]   = nan
-#                model_xarr["BS_OXIDATIONBYDOXIP_full"]                                   = model_xarr["BS_OXIDATIONBYDOXI_full"].values.copy()
-#                model_xarr["BS_OXIDATIONBYDOXIP_full"]                                  -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_OXIDATIONBYDOXI_full"].values),sigma_lo,mode="reflect")
-#                model_xarr["BS_OXIDATIONBYDOXIP_full"].values[BlackSea_mask3d[0] == 0]   = nan
-                
-#                # BIO 2D PTRC (1 vars : airseaoxygenflux)
-#                model_xarr["BS_AirSeaOxygenFlux_full" ].values                          = fillmask_kdtree(model_xarr["BS_AirSeaOxygenFlux_full"].values,AirSeaOxygenFlux != 0,weights=k_wghts)
-#                model_xarr["BS_AirSeaOxygenFlux_full" ].values[BlackSea_mask3d[0] == 0] = nan
-#                model_xarr["BS_AirSeaOxygenFluxP_full"]                                 = model_xarr["BS_AirSeaOxygenFlux_full"].values.copy()
-#                model_xarr["BS_AirSeaOxygenFluxP_full"]                                -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_AirSeaOxygenFlux_full"].values),sigma_lo,mode="reflect")
-#                model_xarr["BS_AirSeaOxygenFluxP_full"].values[BlackSea_mask3d[0] == 0] = nan
-                
-
             model_xarr["BS_u_full"].values[k][u[k] == 0] = nan
             model_xarr["BS_u_full"][k] = fillmask_kdtree(model_xarr["BS_u_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
 
@@ -2522,89 +2467,11 @@ if __name__ == "__main__":
                 model_xarr[fullstringP][k]                                 -= gaussian_with_nans(ma.masked_invalid(model_xarr[fullstring].values[k]),sigma_lo,mode="reflect")
                 model_xarr[fullstringP].values[k][BlackSea_mask3d[k] == 0]  = nan
 
-            # # ------------------------------------------------------------------------
-            # ## BGC variables
-            # # BIO 3D DIAG (3 vars : NPPO, ZooResp, DOC)
-            # # ------------------------------------------------------------------------
-            # # model_xarr["BS_NPPO_full"     ].values[k]       = fillmask_kdtree(model_xarr["BS_NPPO_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_NPPO_full"     ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_NPPOP_full"    ][k]              = model_xarr["BS_NPPO_full"].values[k].copy()
-            # model_xarr["BS_NPPOP_full"    ][k]             -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_NPPO_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_NPPOP_full"    ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_ZooResp_full" ].values[k]       = fillmask_kdtree(model_xarr["BS_ZooResp_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_ZooResp_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_ZooRespP_full"][k]              = model_xarr["BS_ZooResp_full"].values[k].copy()
-            # model_xarr["BS_ZooRespP_full"][k]             -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_ZooResp_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_ZooRespP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_DOC_full"      ].values[k]       = fillmask_kdtree(model_xarr["BS_DOC_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_DOC_full"      ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_DOCP_full"     ][k]              = model_xarr["BS_DOC_full"].values[k].copy()
-            # model_xarr["BS_DOCP_full"     ][k]             -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_DOC_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_DOCP_full"     ].values[k][BlackSea_mask3d[k] == 0] = nan
-
-            # # BIO 3D PTRC (9 vars :  bac_oxygenconsumption, OXIDATIONBYDOX, CHL, DOX, NOS, POC, PAR, NHS, ODU)
-            # model_xarr["BS_OXIDATIONBYDOX_full" ].values[k] = fillmask_kdtree(model_xarr["BS_OXIDATIONBYDOX_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_OXIDATIONBYDOX_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_OXIDATIONBYDOXP_full"][k]        = model_xarr["BS_OXIDATIONBYDOX_full"].values[k].copy()            
-            # model_xarr["BS_OXIDATIONBYDOXP_full"][k]       -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_OXIDATIONBYDOX_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_OXIDATIONBYDOXP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_bac_oxygenconsumption_full" ].values[k] = fillmask_kdtree(model_xarr["BS_bac_oxygenconsumption_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_bac_oxygenconsumption_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_bac_oxygenconsumptionP_full"][k]  = model_xarr["BS_bac_oxygenconsumption_full"].values[k].copy()
-            # model_xarr["BS_bac_oxygenconsumptionP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_bac_oxygenconsumption_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_bac_oxygenconsumptionP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_CHL_full" ].values[k]  = fillmask_kdtree(model_xarr["BS_CHL_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts,)
-            # model_xarr["BS_CHL_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_CHLP_full"][k]  = model_xarr["BS_CHL_full"].values[k].copy()
-            # model_xarr["BS_CHLP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_CHL_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_CHLP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_DOX_full" ].values[k] = fillmask_kdtree(model_xarr["BS_DOX_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_DOX_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_DOXP_full"][k]  = model_xarr["BS_DOX_full"].values[k].copy()
-            # model_xarr["BS_DOXP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_DOX_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_DOXP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_NOS_full" ].values[k] = fillmask_kdtree(model_xarr["BS_NOS_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_NOS_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_NOSP_full"][k]  = model_xarr["BS_NOS_full"].values[k].copy()
-            # model_xarr["BS_NOSP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_NOS_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_NOSP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_POC_full" ].values[k] = fillmask_kdtree(model_xarr["BS_POC_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_POC_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_POCP_full"][k]  = model_xarr["BS_POC_full"].values[k].copy()
-            # model_xarr["BS_POCP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_POC_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_POCP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_PAR_full" ].values[k] = fillmask_kdtree(model_xarr["BS_PAR_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_PAR_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_PARP_full"][k]  = model_xarr["BS_PAR_full"].values[k].copy()
-            # model_xarr["BS_PARP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_PAR_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_PARP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_NHS_full" ].values[k] = fillmask_kdtree(model_xarr["BS_NHS_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_NHS_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_NHSP_full"][k]  = model_xarr["BS_NHS_full"].values[k].copy()
-            # model_xarr["BS_NHSP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_NHS_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_NHSP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-            # model_xarr["BS_ODU_full" ].values[k] = fillmask_kdtree(model_xarr["BS_ODU_full"].values[k],~BlackSea_mask3d[k].copy(),weights=k_wghts)
-            # model_xarr["BS_ODU_full" ].values[k][BlackSea_mask3d[k] == 0] = nan
-            # model_xarr["BS_ODUP_full"][k]  = model_xarr["BS_ODU_full"].values[k].copy()
-            # model_xarr["BS_ODUP_full"][k] -= gaussian_with_nans(ma.masked_invalid(model_xarr["BS_ODU_full"].values[k]),sigma_lo,mode="reflect")
-            # model_xarr["BS_ODUP_full"].values[k][BlackSea_mask3d[k] == 0] = nan
-            # # ------------------------------------------------------------------------
-
         # Prepare for multiprocessor
         # Put variables into shared memory
         # Loop over individual eddies corresponding to current day
         if use_MP:
-            print("\nStarting Pool for %s" % num2date(model_date).date().isoformat())
+            print("\nStarting Pool for %s using %s CPUs" % num2date(model_date).date().isoformat(), ncpu)
             pool = Pool(processes=ncpu)
             pool.map(MP_process_eddies, the_eddy_day_i)
             pool.close()
