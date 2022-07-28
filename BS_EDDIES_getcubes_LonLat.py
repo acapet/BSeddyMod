@@ -1630,7 +1630,10 @@ def MP_process_eddies(eddy_iter):
     v_interp_ctypes[xyz_slc] = v_eddy_interp.ravel()
     w_interp_ctypes[xyz_slc] = w_eddy_interp.ravel()
 
-    # print('---- Leaving MP_process_eddies -------------------------------------------')
+    print(
+        "Leaving for \n#### %s #### Lon=%s #### Lat=%s ###############"
+        % (the_date_str, eddy.centlon[0], eddy.centlat[0])
+    )
     return
 
 
@@ -2520,8 +2523,11 @@ if __name__ == "__main__":
             print("\nStarting Pool for %s using %s CPUs" %(num2date(model_date).date().isoformat(), ncpu))
             pool = Pool(processes=ncpu)
             pool.map(MP_process_eddies, the_eddy_day_i)
+            print("Mapping Done")
             pool.close()
+            print("Pool closed")
             pool.join()
+            print("Pool joined")
         else:
             print("Starting Serial")
             # for eddy_day_i in the_eddy_day_i:
