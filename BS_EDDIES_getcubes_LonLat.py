@@ -2517,7 +2517,7 @@ if __name__ == "__main__":
         # Put variables into shared memory
         # Loop over individual eddies corresponding to current day
         if use_MP:
-            print("\nStarting Pool for %s using %s CPUs" % num2date(model_date).date().isoformat(), ncpu)
+            print("\nStarting Pool for %s using %s CPUs" %(num2date(model_date).date().isoformat(), ncpu))
             pool = Pool(processes=ncpu)
             pool.map(MP_process_eddies, the_eddy_day_i)
             pool.close()
