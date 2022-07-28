@@ -4,7 +4,7 @@
 #SBATCH --time=00:30:00 # days-hh:mm:ss
 #
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
+#SBATCH --cpus-per-task=4
 #SBATCH --mem-per-cpu=6400 # megabytes
 #SBATCH --partition=batch
 #
@@ -17,7 +17,7 @@
 
 source ~/pyload_evan
 
-export OMP_NUM_THREADS=6
-export MKL_NUM_THREADS=6
+export OMP_NUM_THREADS=4
+export MKL_NUM_THREADS=4
 
-mpirun --bind-to none python BS_EDDIES_getcubes_LonLat.py -y $year -m $month $SLURM_ARRAY_TASK_ID
+mpirun --bind-to none python BS_EDDIES_getcubes_LonLat.py -y $year -m $month -n 4 $SLURM_ARRAY_TASK_ID
