@@ -150,10 +150,12 @@ from emTools import (
 parser = argparse.ArgumentParser()
 parser.add_argument("-y","--year", type=int, help="start year")
 parser.add_argument("-m","--month", type=int, help="start month (1st)")
+parser.add_argument("-n","--ncpu", type=int, help="ncpus")
 
 args = parser.parse_args()
 runyear  = args.year
 runmonth = args.month
+ncpus_arg = args.ncpu
 
 Kelvin = 273.15
 # EARTH_R = 6371315.
@@ -1728,7 +1730,7 @@ if __name__ == "__main__":
     fill_value_16 = int16(1e15)
     fill_value_8 = int8(126)
 
-    ncpu = 6 # cpu_count() #- 8
+    ncpu = ncpus_arg #6 # cpu_count() #- 8
 
     # PRIMES: sigma = desired wavelength * 0.125 / model.resolution
     sigma_lo = 6 * 0.125 / (1 / 12.0)
