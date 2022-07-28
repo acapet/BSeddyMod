@@ -1725,7 +1725,7 @@ if __name__ == "__main__":
     fill_value_16 = int16(1e15)
     fill_value_8 = int8(126)
 
-    ncpu = cpu_count() #- 8
+    ncpu = 6 # cpu_count() #- 8
 
     # PRIMES: sigma = desired wavelength * 0.125 / model.resolution
     sigma_lo = 6 * 0.125 / (1 / 12.0)
