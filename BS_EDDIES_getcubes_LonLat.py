@@ -218,8 +218,6 @@ def create_nc(
     fill_value_64,
     lon_full,
     lat_full,
-    lon_eddy,
-    lat_eddy,
 ):
 
     print("---- Creating output file")
@@ -282,17 +280,7 @@ def create_nc(
     nc.variables["lat"][:] = lat_full
     nc.variables["lat"].description = "Latitude from BlackSea model"
     nc.variables["lat"].units = "degrees"
-
-    nc.createVariable("eddy_lon", float32, ("x"))
-    nc.variables["eddy_lon"][:] = lon_eddy
-    nc.variables["eddy_lon"].description = "Longitude of the eddy domain"
-    nc.variables["eddy_lon"].units = "degrees"
-
-    nc.createVariable("eddy_lat", float32, ("y"))
-    nc.variables["lat"][:] = lat_full
-    nc.variables["lat"].description = "Latitude of the eddy domain"
-    nc.variables["lat"].units = "degrees"
-    
+   
     # Eddy tracker output variables
     nc.createVariable("eddy_date", int64, ("one"))
     nc.createVariable("time", float32, ("time"))
@@ -677,7 +665,20 @@ def create_nc(
     )
     nc.variables[vname].description = "Mixed layer depth"
     nc.variables[vname].units = "m"
-
+    # ---------------------------------------------------------------------------
+    vname = "navlon"
+    nc.createVariable(
+        vname, float32, ("time", "y", "x"), fill_value=fill_value_32, zlib=True
+    )
+    nc.variables[vname].description = "Longitude"
+    nc.variables[vname].units = "degrees east"
+    # ---------------------------------------------------------------------------
+    vname = "navlat"
+    nc.createVariable(
+        vname, float32, ("time", "y", "x"), fill_value=fill_value_32, zlib=True
+    )
+    nc.variables[vname].description = "Latitude"
+    nc.variables[vname].units = "degrees north"    
     # ---------------------------------------------------------------------------
     vname = "TOPO"
     nc.createVariable(
@@ -1120,19 +1121,21 @@ def MP_process_eddies(eddy_iter):
         BlackSea_z3d = repeat(BlackSea_z, x_m_2d.size).reshape(BS_eddy_3d_shape)
 
     # Model eddies
-    t_eddy = model_xarr["BS_temp_full"].values[:, y_slc, x_slc].copy()
-    tP_eddy = model_xarr["BS_tempP_full"].values[:, y_slc, x_slc].copy()
-    s_eddy = model_xarr["BS_salt_full"].values[:, y_slc, x_slc].copy()
-    sP_eddy = model_xarr["BS_saltP_full"].values[:, y_slc, x_slc].copy()
-    rho_eddy = model_xarr["BS_rho_full"].values[:, y_slc, x_slc].copy()
+    t_eddy    = model_xarr["BS_temp_full"].values[:, y_slc, x_slc].copy()
+    tP_eddy   = model_xarr["BS_tempP_full"].values[:, y_slc, x_slc].copy()
+    s_eddy    = model_xarr["BS_salt_full"].values[:, y_slc, x_slc].copy()
+    sP_eddy   = model_xarr["BS_saltP_full"].values[:, y_slc, x_slc].copy()
+    rho_eddy  = model_xarr["BS_rho_full"].values[:, y_slc, x_slc].copy()
     rhoP_eddy = model_xarr["BS_rhoP_full"].values[:, y_slc, x_slc].copy()
-    u_eddy = model_xarr["BS_u_full"].values[:, y_slc, x_slc].copy()
-    v_eddy = model_xarr["BS_v_full"].values[:, y_slc, x_slc].copy()
-    w_eddy = model_xarr["BS_w_full"].values[:, y_slc, x_slc].copy()
+    u_eddy    = model_xarr["BS_u_full"].values[:, y_slc, x_slc].copy()
+    v_eddy    = model_xarr["BS_v_full"].values[:, y_slc, x_slc].copy()
+    w_eddy    = model_xarr["BS_w_full"].values[:, y_slc, x_slc].copy()
     vort_eddy = model_xarr["BS_vort_full"].values[:, y_slc, x_slc].copy()
 
-    ssh_eddy = model_xarr["BS_ssh_full"].values[y_slc, x_slc].copy()
-    mld_eddy = model_xarr["BS_mld_full"].values[y_slc, x_slc].copy()
+    ssh_eddy  = model_xarr["BS_ssh_full"].values[y_slc, x_slc].copy()
+    mld_eddy  = model_xarr["BS_mld_full"].values[y_slc, x_slc].copy()
+    navlon_eddy  = model_xarr["BS_navlon_full"].values[y_slc, x_slc].copy()
+    navlat_eddy  = model_xarr["BS_navlat_full"].values[y_slc, x_slc].copy()
     topo_eddy = model_xarr["BS_topo"].values[y_slc, x_slc].copy()
 
     # BIO 2D DIAG (4 vars : bac_oxygenconsumptionI, ZooRespI, NPPOI, OXIDATIONBYDOXI)
@@ -1209,7 +1212,13 @@ def MP_process_eddies(eddy_iter):
     ## mld_eddy
     mld_eddy[:]      = fill_nans(mld_eddy)
     mld_eddy_interp  = interp_midi(tri_xy, mld_eddy, interpolator, xgrid, ygrid)
+    ## navlon_eddy
+    navlon_eddy[:]      = fill_nans(navlon_eddy)
+    navlon_eddy_interp  = interp_midi(tri_xy, navlon_eddy, interpolator, xgrid, ygrid)
 
+    ## navlat_eddy
+    navlat_eddy[:]      = fill_nans(navlat_eddy)
+    navlat_eddy_interp  = interp_midi(tri_xy, navlat_eddy, interpolator, xgrid, ygrid)
     ## TOPO
     topo_eddy[:]     = fill_nans(topo_eddy)
     topo_eddy_interp = interp_midi(tri_xy, topo_eddy, interpolator, xgrid, ygrid)
@@ -1459,6 +1468,8 @@ def MP_process_eddies(eddy_iter):
             if not k:
                 ssh_eddy_interp[:].ravel()[mask_k] = nan
                 mld_eddy_interp[:].ravel()[mask_k] = nan
+                navlon_eddy_interp[:].ravel()[mask_k] = nan
+                navlat_eddy_interp[:].ravel()[mask_k] = nan
                 topo_eddy_interp[:].ravel()[mask_k] = nan
                 ZooRespI_eddy_interp[:].ravel()[mask_k] = nan
                 ZooRespIP_eddy_interp[:].ravel()[mask_k] = nan
@@ -1543,6 +1554,8 @@ def MP_process_eddies(eddy_iter):
     #-----------------------------------------------------------------------------
     ssh_interp_ctypes[xy_slc] = ssh_eddy_interp.ravel()
     mld_interp_ctypes[xy_slc] = mld_eddy_interp.ravel()
+    navlon_interp_ctypes[xy_slc] = navlon_eddy_interp.ravel()
+    navlat_interp_ctypes[xy_slc] = navlat_eddy_interp.ravel()
     topo_interp_ctypes[xy_slc] = topo_eddy_interp.ravel()
 
     # BIO 2D DIAG (4 vars : bac_oxygenconsumptionI, ZooRespI, NPPOI, OXIDATIONBYDOXI)
@@ -1826,7 +1839,9 @@ if __name__ == "__main__":
         # 2D
         "BS_ssh_full": (("y", "x"), BlackSea_mask3d[0].astype(float64)),
         "BS_mld_full": (("y", "x"), BlackSea_mask3d[0].astype(float64)),
-        
+        "BS_navlon_full": (("y", "x"), BlackSea_mask3d[0].astype(float64)),
+        "BS_navlat_full": (("y", "x"), BlackSea_mask3d[0].astype(float64)),
+
         # 3D
         "BS_DOX_full": (("z", "y", "x"), BlackSea_mask3d.astype(float64)),
         "BS_DOXP_full": (("z", "y", "x"), BlackSea_mask3d.astype(float64)),
@@ -1959,9 +1974,7 @@ if __name__ == "__main__":
                     fill_value_32,
                     fill_value_64,
                     BlackSea_lon[0],
-                    BlackSea_lat[:, 0],
-                    BlackSea_lon_eddy[0],
-                    BlackSea_lat_eddy[:, 0],                    
+                    BlackSea_lat[:, 0],                 
                 )
 
             # Read in eddy tracks and sort in date order
@@ -2072,6 +2085,8 @@ if __name__ == "__main__":
         print("---- Setting up `sharedctypes` arrays")
         ssh_interp_ctypes   = sharedctypes.RawArray("d", xy_size)
         mld_interp_ctypes   = sharedctypes.RawArray("d", xy_size)
+        navlon_interp_ctypes   = sharedctypes.RawArray("d", xy_size)
+        navlat_interp_ctypes   = sharedctypes.RawArray("d", xy_size)
         topo_interp_ctypes  = sharedctypes.RawArray("d", xy_size)
         mask_interp_ctypes  = sharedctypes.RawArray("i", xyz_size)
         temp_interp_ctypes  = sharedctypes.RawArray("d", xyz_size)
@@ -2149,6 +2164,12 @@ if __name__ == "__main__":
         mld_interp_ctypes[:] = memoryview(
             full_like(mld_interp_ctypes, fill_value, dtype=float)
         )
+        navlon_interp_ctypes[:] = memoryview(
+            full_like(navlon_interp_ctypes, fill_value, dtype=float)
+        )
+        navlat_interp_ctypes[:] = memoryview(
+            full_like(navlat_interp_ctypes, fill_value, dtype=float)
+        )        
         topo_interp_ctypes[:] = memoryview(
             full_like(topo_interp_ctypes, fill_value, dtype=float)
         )
@@ -2302,6 +2323,11 @@ if __name__ == "__main__":
             mld = nc.variables["somld_bs"][:].squeeze()
             model_xarr["BS_mld_full"][:] = ma.masked_where(mask[0], mld)
 
+            navlon = nc.variables["nav_lon"][:].squeeze()
+            model_xarr["BS_navlon_full"][:] = ma.masked_where(mask[0], navlon)
+
+            navlat = nc.variables["nav_lat"][:].squeeze()
+            model_xarr["BS_navlat_full"][:] = ma.masked_where(mask[0], navlat)
             # model_xarr['BS_pv_full'][:] = zeros_like(nc.variables['uo'][0, z_slc])
 
         with Dataset(
@@ -2412,6 +2438,12 @@ if __name__ == "__main__":
 
                 model_xarr["BS_mld_full"].values[mld == 0] = nan
                 model_xarr["BS_mld_full"][:] = fillmask_kdtree(model_xarr["BS_mld_full"].values, mld != 0, weights=k_wghts)
+
+                model_xarr["BS_navlon_full"].values[navlon == 0] = nan
+                model_xarr["BS_navlon_full"][:] = fillmask_kdtree(model_xarr["BS_navlon_full"].values, navlon != 0, weights=k_wghts)
+
+                model_xarr["BS_navlat_full"].values[navlat == 0] = nan
+                model_xarr["BS_navlat_full"][:] = fillmask_kdtree(model_xarr["BS_navlat_full"].values, navlat != 0, weights=k_wghts)
 
                 # BIO 2D DIAG (4 vars : bac_oxygenconsumptionI, ZooRespI, NPPOI, OXIDATIONBYDOXI)
                 # BIO 2D PTRC (1 vars : airseaoxygenflux)
@@ -2536,6 +2568,15 @@ if __name__ == "__main__":
             nc.variables["MLD"][the_eddy_days_i] = array(mld_interp_ctypes[:]).reshape(
                 -1, *xgrid.shape
             )
+
+            nc.variables["navlon"][the_eddy_days_i] = array(navlon_interp_ctypes[:]).reshape(
+                -1, *xgrid.shape
+            )
+
+            nc.variables["navlat"][the_eddy_days_i] = array(navlat_interp_ctypes[:]).reshape(
+                -1, *xgrid.shape
+            )
+
             nc.variables["TOPO"][the_eddy_days_i] = array(
                 topo_interp_ctypes[:]
             ).reshape(-1, *xgrid.shape)
