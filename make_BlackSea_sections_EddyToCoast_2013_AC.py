@@ -179,12 +179,11 @@ if __name__ == "__main__":
         for tind, the_day in enumerate(ds.time):
 
             yyyymmdd_str = num2date(the_day).strftime("%Y%m%d")
-            #yyyymmdd = to_datetime(num2date(the_day))
-            #yyyymmdd = the_day  #to_datetime([yyyymmdd_str])
-            #sasa
             print("------", tind, yyyymmdd_str)
 
             mld = ds["MLD"].values[tind]
+            lon = ds["MLD"].values[tind]
+            lat = ds["MLD"].values[tind]                        
             ssh = ds["SSH"].values[tind]
             topo = ds["TOPO"].values[tind]
 
@@ -197,7 +196,6 @@ if __name__ == "__main__":
             if nanmax(topo) < z_thresh:
                 continue
                 
-
             centlon = ds["centlon"][tind]
             centlat = ds["centlat"][tind]
             
@@ -370,7 +368,10 @@ if __name__ == "__main__":
                     "saltP"      : (dax, salt2dP[newaxis]),
                     "w"          : (dax, w2d[newaxis]),
 
-                    "mld"        : (("index", "norm_eddy_radius"), [mld1d]),#[mld1d]),
+                    "mld"        : (("index", "norm_eddy_radius"), [mld1d]),
+                    "lon"        : (("index", "norm_eddy_radius"), [lon1d]),
+                    "lat"        : (("index", "norm_eddy_radius"), [lat1d]),
+                    
                     "topo"       : (("index", "norm_eddy_radius"), [topo1d]),
                     "ssh"        : (("index", "norm_eddy_radius"), [ssh1d]),
                     "time"       : ('index', [time.data]),
@@ -409,6 +410,7 @@ if __name__ == "__main__":
                 )
             )
 
+            ## SAVING TO NETCDF
             ds_daily.transpose("index", "depth", "norm_eddy_radius").to_netcdf(
                 savedir + savefile_z % (cyc, str(track.values).zfill(4), yyyymmdd_str),
                 unlimited_dims="index",
