@@ -200,6 +200,7 @@ if __name__ == "__main__":
 
             # Exclude too shallow regions
             if nanmax(topo) < z_thresh:
+                print("I'm out")
                 continue
                 
             centlon = ds["centlon"][tind]
@@ -240,11 +241,8 @@ if __name__ == "__main__":
                 label="extended",
             )
 
-            print(x_ext)
-            print(y_ext)
-            x_ext = linspace(x_ext[0], x_ext[-1], ds.x.size)
-            y_ext = linspace(y_ext[0], y_ext[-1], ds.x.size)
-
+            x_ext = linspace(x_ext.squeeze()[0], x_ext.squeeze()[-1], ds.x.size)
+            y_ext = linspace(y_ext.squeeze()[0], y_ext.squeeze()[-1], ds.x.size)
             ax.clear()
             plt.clf()
 
