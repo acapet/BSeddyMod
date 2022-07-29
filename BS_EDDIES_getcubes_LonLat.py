@@ -1683,7 +1683,8 @@ if __name__ == "__main__":
 
     # Produced 'output_20.nc' with make_ITE_loess_radius.py
     eddy_filtered_L = (
-        "output_loess_ACYC_20_2022version.nc" if ACYC else "output_loess_CYC_20.nc"
+#        "output_loess_ACYC_20_2022version.nc" if ACYC else "output_loess_CYC_20.nc"
+        "output_loess_ACYC_20.nc" if ACYC else "output_loess_CYC_20.nc"
     )
 
     # Topography
