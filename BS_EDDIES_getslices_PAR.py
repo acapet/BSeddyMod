@@ -225,7 +225,7 @@ if __name__ == "__main__":
             ax = fig.add_subplot(111)
 
             topo200 = ax.contour( x, y, topo, [200] )
-            tnearest = topo200.find_nearest_contour(0,0, indices=None, pixel=False)
+            tnearest = topo200.find_nearest_contour(cx,cy, indices=None, pixel=False)
 
             x_short = linspace(0, tnearest[3])
             y_short = linspace(0, tnearest[4])
@@ -239,8 +239,8 @@ if __name__ == "__main__":
                 lw=2,
                 label="extended",
             )
-            x_ext = linspace(x_ext.min(), x_ext.max(), ds.x.size)
-            y_ext = linspace(y_ext.min(), y_ext.max(), ds.x.size)
+            x_ext = linspace(x_ext[0][0], x_ext[0][-1], ds.x.size)
+            y_ext = linspace(y_ext[0][0], y_ext[0][-1], ds.x.size)
 
             ax.clear()
             plt.clf()
