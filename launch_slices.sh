@@ -1,6 +1,6 @@
 #!/bin/bash
 # Submission script for NIC5
-#SBATCH --job-name=EddyCompo
+#SBATCH --job-name=EddySlices
 #SBATCH --time=1-00:00:00 # days-hh:mm:ss
 #
 #SBATCH --ntasks=1
