@@ -242,8 +242,8 @@ if __name__ == "__main__":
 
             print(x_ext)
             print(y_ext)
-            x_ext = linspace(x_ext[0][0], x_ext[0][-1], ds.x.size)
-            y_ext = linspace(y_ext[0][0], y_ext[0][-1], ds.x.size)
+            x_ext = linspace(x_ext[0], x_ext[-1], ds.x.size)
+            y_ext = linspace(y_ext[0], y_ext[-1], ds.x.size)
 
             ax.clear()
             plt.clf()
