@@ -1,4 +1,4 @@
-# %run make_BlackSea_sections_EddyToCoast.py
+# %run bs_eddies_getslices_PAR.py
 
 # from datetime import date, datetime
 import matplotlib.dates as mdates
@@ -31,9 +31,9 @@ from BS_EDDIES_getcubes import get_pm_pn
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-y","--year", type=int, help="start year")
-parser.add_argument("-m","--month", type=int, help="start month (1st)")
-parser.add_argument("-n","--ncpu", type=int, help="ncpus")
+parser.add_argument("-y", "--year" , type=int, help="start year")
+parser.add_argument("-m", "--month", type=int, help="start month (1st)")
+parser.add_argument("-n", "--ncpu" , type=int, help="ncpus")
 
 args = parser.parse_args()
 runyear  = args.year
@@ -91,7 +91,7 @@ def extended(ax, pt, x, y, **args):
     ax.set_ylim(ylim)
     return ax, x_ext, y_ext
 
-def processaday():
+#def processaday():
 
 
 if __name__ == "__main__":
@@ -102,8 +102,11 @@ if __name__ == "__main__":
     pt = 3.5  # pt is point on normalised grid
     z_thresh = 210.0  #225.0
 
-    start_date, end_date = '201401', '201402'
+    print(runyear)
+    start_date, end_date = str(runyear)+'01', str(runyear)+'04'
 
+    print(start_date)
+    print(end_date)
     directory = "/scratch/ulg/mast/acapet/Compout/cubes/"
 
     BS_compo_files = (
@@ -114,6 +117,8 @@ if __name__ == "__main__":
 
     BS_compo_files = sorted(glob(directory + BS_compo_files))
 
+    print(BS_compo_files)
+    
     biovar2Ddiaglist=['bac_oxygenconsumptionI', 'ZooRespI', 'NPPOI', 'OXIDATIONBYDOXI']
     biovar2Dptrclist=['AirSeaOxygenFlux']
     biovar3Ddiaglist=['NPPO', 'ZooResp', 'DOC']

@@ -21,5 +21,5 @@ source ~/pyload_evan
 #export MKL_NUM_THREADS=6
 
 #mpirun --bind-to none
-python make_BlackSea_sections_EddyToCoast_2013_AC.py -y $year -m $month
+python BS_EDDIES_getslices_PAR.py -y $year -m $month #-n $1
 #$SLURM_ARRAY_TASK_ID
