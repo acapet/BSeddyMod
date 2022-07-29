@@ -182,8 +182,8 @@ if __name__ == "__main__":
             print("------", tind, yyyymmdd_str)
 
             mld = ds["MLD"].values[tind]
-            lon = ds["MLD"].values[tind]
-            lat = ds["MLD"].values[tind]                        
+            lon = ds["navlon"].values[tind]
+            lat = ds["navlat"].values[tind]                        
             ssh = ds["SSH"].values[tind]
             topo = ds["TOPO"].values[tind]
 
@@ -299,6 +299,8 @@ if __name__ == "__main__":
 
                     if not msk.all():
                         mld[:]  = fillmask_kdtree(mld, msk, weights=wgt)
+                        lon[:]  = fillmask_kdtree(lon, msk, weights=wgt)
+                        lat[:]  = fillmask_kdtree(lat, msk, weights=wgt)
                         topo[:] = fillmask_kdtree(topo, msk, weights=wgt)
                         ssh[:]  = fillmask_kdtree(ssh, msk, weights=wgt)
                         # bio loop 2D, filling masked points
@@ -307,6 +309,9 @@ if __name__ == "__main__":
                             biodic[vvv]['cubearrayP'][:] = fillmask_kdtree(biodic[vvv]['cubearrayP'], msk, weights=wgt)
 
                     mld1d   = interp_to_2D(mld, x[0], y[:, 0], x_ext, y_ext)
+                    lon1d   = interp_to_2D(lon, x[0], y[:, 0], x_ext, y_ext)
+                    lat1d   = interp_to_2D(lat, x[0], y[:, 0], x_ext, y_ext)
+                    
                     topo1d  = interp_to_2D(topo, x[0], y[:, 0], x_ext, y_ext)
                     ssh1d   = interp_to_2D(ssh, x[0], y[:, 0], x_ext, y_ext) 
                     # bio loop 2D, interp on slice
