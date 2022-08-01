@@ -103,7 +103,7 @@ if __name__ == "__main__":
     z_thresh = 210.0  #225.0
 
     print(runyear)
-    start_date, end_date = str(runyear)+'01', str(runyear)+'04'
+    start_date, end_date = str(runyear)+str(runmonth), str(runyear)+'12'
 
     print(start_date)
     print(end_date)
