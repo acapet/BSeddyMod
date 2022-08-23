@@ -5,21 +5,13 @@ import xarray as xr
 from matplotlib import pyplot as plt
 from glob import glob
 from netCDF4 import Dataset
+import argparse
 
-if __name__ == "__main__":
+parser = argparse.ArgumentParser()
+parser.add_argument("-y", "--year" , type=str, help="start year")
 
-    plt.close("all")
-
-    #savedir = "/Users/emason/Dropbox/BlackSea/figures_BS/"
-    
-    directory_Z = "~/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/"
-    directory_RHO = "~/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/"
-
-from numpy import array
-import xarray as xr
-from matplotlib import pyplot as plt
-from glob import glob
-from netCDF4 import Dataset
+args = parser.parse_args()
+runyear  = args.year
 
 if __name__ == "__main__":
 
@@ -30,8 +22,8 @@ if __name__ == "__main__":
     directory_Z = "/home/arthur/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/"
     directory_RHO = "/home/arthur/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/"
     
-    files_Z = sorted(glob(directory_Z + "BS_Z_slices_ACYC_track-????_????????.nc"))
-    files_RHO = sorted(glob(directory_RHO + "BS_RHO_slices_ACYC_track-????_????????.nc"))
+    files_Z = sorted(glob(directory_Z + "BS_Z_slices_ACYC_track-????_"+runyear+"????.nc"))
+    files_RHO = sorted(glob(directory_RHO + "BS_RHO_slices_ACYC_track-????_"+runyear+"????.nc"))
 
     var3Dlonely = ['vort','w']
     var2Dlonely = ['mld','lon','lat','topo','ssh',]
