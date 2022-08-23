@@ -31,8 +31,8 @@ from BS_EDDIES_getcubes import get_pm_pn
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-y", "--year" , type=int, help="start year")
-parser.add_argument("-m", "--month", type=int, help="start month (1st)")
+parser.add_argument("-y", "--year" , type=str, help="start year")
+parser.add_argument("-m", "--month", type=str, help="start month (1st)")
 parser.add_argument("-n", "--ncpu" , type=int, help="ncpus")
 
 args = parser.parse_args()
@@ -90,6 +90,44 @@ def extended(ax, pt, x, y, **args):
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     return ax, x_ext, y_ext
+
+
+# https://stackoverflow.com/questions/30844482/what-is-most-efficient-way-to-find-the-intersection-of-a-line-and-a-circle-in-py
+def circle_line_segment_intersection(circle_center, circle_radius, pt1, pt2, full_line=True, tangent_tol=1e-9):
+    """ Find the points at which a circle intersects a line-segment.  This can happen at 0, 1, or 2 points.
+
+    :param circle_center: The (x, y) location of the circle center
+    :param circle_radius: The radius of the circle
+    :param pt1: The (x, y) location of the first point of the segment
+    :param pt2: The (x, y) location of the second point of the segment
+    :param full_line: True to find intersections along full line - not just in the segment.  False will just return intersections within the segment.
+    :param tangent_tol: Numerical tolerance at which we decide the intersections are close enough to consider it a tangent
+    :return Sequence[Tuple[float, float]]: A list of length 0, 1, or 2, where each element is a point at which the circle intercepts a line segment.
+
+    Note: We follow: http://mathworld.wolfram.com/Circle-LineIntersection.html
+    """
+
+    (p1x, p1y), (p2x, p2y), (cx, cy) = pt1, pt2, circle_center
+    (x1, y1), (x2, y2) = (p1x - cx, p1y - cy), (p2x - cx, p2y - cy)
+    dx, dy = (x2 - x1), (y2 - y1)
+    dr = (dx ** 2 + dy ** 2)**.5
+    big_d = x1 * y2 - x2 * y1
+    discriminant = circle_radius ** 2 * dr ** 2 - big_d ** 2
+
+    if discriminant < 0:  # No intersection between circle and line
+        return []
+    else:  # There may be 0, 1, or 2 intersections with the segment
+        intersections = [
+            (cx + (big_d * dy + sign * (-1 if dy < 0 else 1) * dx * discriminant**.5) / dr ** 2,
+             cy + (-big_d * dx + sign * abs(dy) * discriminant**.5) / dr ** 2)
+            for sign in ((1, -1) if dy < 0 else (-1, 1))]  # This makes sure the order along the segment is correct
+        if not full_line:  # If only considering the segment, filter out intersections that do not fall within the segment
+            fraction_along_segment = [(xi - p1x) / dx if abs(dx) > abs(dy) else (yi - p1y) / dy for xi, yi in intersections]
+            intersections = [pt for pt, frac in zip(intersections, fraction_along_segment) if 0 <= frac <= 1]
+        if len(intersections) == 2 and abs(discriminant) <= tangent_tol:  # If line is tangent to circle, return just one point (as both intersections have same location)
+            return [intersections[0]]
+        else:
+            return intersections
 
 #def processaday():
 
@@ -182,7 +220,7 @@ if __name__ == "__main__":
                              'cubearrayP'  : ma.zeros((mask.shape[1:]))
                              }
 
-        for tind, the_day in enumerate(ds.time):
+        for tind, the_day in enumerate(ds.time): # This loop is on time AND tracks. ds.time isn't monotonous; it contains times for each obs of each track. 
 
             yyyymmdd_str = num2date(the_day).strftime("%Y%m%d")
             print("------", tind, yyyymmdd_str)
@@ -228,10 +266,23 @@ if __name__ == "__main__":
             topo200 = ax.contour( x, y, topo, [200] )
             tnearest = topo200.find_nearest_contour(cx,cy, indices=None, pixel=False)
 
+            print('tnearest : ') 
+            print(tnearest)
+            
             x_short = linspace(0, tnearest[3])
             y_short = linspace(0, tnearest[4])
 
-            _, x_ext, y_ext = extended(
+#            _, x_ext, y_ext = extended(
+#                ax,
+#                pt,
+#                x_short,
+#                y_short,
+#                color="lightsteelblue",
+#                lw=2,
+#                label="extended",
+#            )
+
+            _, x_ext, y_ext = extended_circle(
                 ax,
                 pt,
                 x_short,
@@ -241,6 +292,10 @@ if __name__ == "__main__":
                 label="extended",
             )
 
+            print('x_ext shape')
+            print(x_ext.shape)
+            print('y_ext shape')
+            print(y_ext.shape)
             x_ext = linspace(x_ext.squeeze()[0], x_ext.squeeze()[-1], ds.x.size)
             y_ext = linspace(y_ext.squeeze()[0], y_ext.squeeze()[-1], ds.x.size)
             ax.clear()
