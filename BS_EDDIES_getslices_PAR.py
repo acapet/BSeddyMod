@@ -269,8 +269,8 @@ if __name__ == "__main__":
             print('tnearest : ') 
             print(tnearest)
             
-            x_short = linspace(0, tnearest[3])
-            y_short = linspace(0, tnearest[4])
+#            x_short = linspace(0, tnearest[3])
+#            y_short = linspace(0, tnearest[4])
 
 #            _, x_ext, y_ext = extended(
 #                ax,
@@ -281,23 +281,17 @@ if __name__ == "__main__":
 #                lw=2,
 #                label="extended",
 #            )
+            # x_ext = linspace(x_ext.squeeze()[0], x_ext.squeeze()[-1], ds.x.size)
+            # y_ext = linspace(y_ext.squeeze()[0], y_ext.squeeze()[-1], ds.x.size)
 
-            _, x_ext, y_ext = extended_circle(
-                ax,
-                pt,
-                x_short,
-                y_short,
-                color="lightsteelblue",
-                lw=2,
-                label="extended",
-            )
+            # Get the coordinates of two points of intersetion between 
+            #   the line including the segment between center and nearest coastline, 
+            #   and a centered circle of radius pt
+            intpoint1, intpoint2 = circle_line_segment_intersection((0,0), pt, (0,0), (tnearest[3],tnearest[4]))
+    
+            x_ext = linspace(intpoint1[0], intpoint2[0], ds.x.size)
+            y_ext = linspace(intpoint1[1], intpoint2[1], ds.x.size)
 
-            print('x_ext shape')
-            print(x_ext.shape)
-            print('y_ext shape')
-            print(y_ext.shape)
-            x_ext = linspace(x_ext.squeeze()[0], x_ext.squeeze()[-1], ds.x.size)
-            y_ext = linspace(y_ext.squeeze()[0], y_ext.squeeze()[-1], ds.x.size)
             ax.clear()
             plt.clf()
 
