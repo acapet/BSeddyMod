@@ -23,7 +23,7 @@ for region in range(5):
     xas=[]
     for i, f in enumerate(files_Z):
         xa=xr.load_dataset(f)
-        print(i,f,xa.region.values[0])
+        if i%100==0: print(i,f,xa.region.values[0])
         if int(xa.region.values[0]) != region:
             continue
         #if initdone:
