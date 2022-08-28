@@ -33,19 +33,21 @@ if __name__ == "__main__":
     varbio2Dlist=['bac_oxygenconsumptionI', 'ZooRespI', 'NPPOI', 'OXIDATIONBYDOXI', 'AirSeaOxygenFlux']
            
 
-    #For region assignement
+    ######  For region assignement  ################################
     xreg  = xr.load_dataset(filedir+'../files/region_REVISITED.nc')
     xgrid = xr.load_dataset(filedir+'../files/mesh_mask_31levels.nc')
     xreg  = xreg.assign_coords({'x':('x',xgrid.nav_lon[0,:].values)})
     xreg  = xreg.assign_coords({'y':('y',xgrid.nav_lat[:,0].values)})
+    #################################################################
 
     for i, file_Z in enumerate(files_Z):
 
-        #For region assignement    
         ds_Z = xr.open_dataset(file_Z) 
 
+        ######  For region assignement  ################################
         newreg=xreg.region.interp({'x':ds_Z.centlon, 'y':ds_Z.centlat}).values
-    
+        #################################################################
+
         topo = ds_Z.topo[0].values
         topo_start, topo_end = (topo[0], topo[-1])
            
