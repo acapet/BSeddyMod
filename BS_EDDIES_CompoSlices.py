@@ -7,8 +7,8 @@ from glob import glob
 
 runyear = "????"
 
-directory_Z   = "/home/arthur/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/"
-directory_RHO = "/home/arthur/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/"
+directory_Z   = "/home/arthur/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/Z_slices/"
+directory_RHO = "/home/arthur/Desktop/PAPERS_UNDER_WORK/Evan1/diagfiles/RHO_slices/"
 files_Z       = sorted(glob(directory_Z + "BS_Z_slices_ACYC_track-????_"+runyear+"????_T.nc"))
 files_RHO     = sorted(glob(directory_RHO + "BS_RHO_slices_ACYC_track-????_"+runyear+"????_T.nc"))
 
@@ -20,14 +20,16 @@ for region in range(5):
 
     print(' .. Z files')
     # Z FILES
+    xas=[]
     for i, f in enumerate(files_Z):
         xa=xr.load_dataset(f)
+        print(i,f,xa.region.values[0])
         if int(xa.region.values[0]) != region:
             continue
-        if i==0:
-            xas = [xa.drop(['xcoord','ycoord','index'])]
-        else:
-            xas.append(xa.drop(['xcoord','ycoord','index']))
+        #if initdone:
+        #    xas = [xa.drop(['xcoord','ycoord','index'])]
+        #else:
+        xas.append(xa.drop(['xcoord','ycoord','index']))
 
     xm=xr.concat(xas,'index')
 
@@ -42,21 +44,24 @@ for region in range(5):
     print(' .. RHO files')
 
 # RHO FILES
-    for i, f in enumerate(files_RHO):
-        xa=xr.load_dataset(f)
-        if int(xa.region.values[0]) != region:
-            continue
-        if i==0:
-            xas = [xa.drop(['xcoord','ycoord','index'])]
-        else:
+    if False: 
+        xas=[]
+        for i, f in enumerate(files_RHO):
+            print(i,f,xa.region.values[0])
+            xa=xr.load_dataset(f)
+            if int(xa.region.values[0]) != region:
+                continue
+            #if i==0:
+            #    xas = [xa.drop(['xcoord','ycoord','index'])]
+            #else:
             xas.append(xa.drop(['xcoord','ycoord','index']))
 
-    xm=xr.concat(xas,'index')
+        xm=xr.concat(xas,'index')
 
-    xmean  = xm.mean ('index')
-    xstd   = xm.std  ('index')
-    xcount = xm.count('index')
+        xmean  = xm.mean ('index')
+        xstd   = xm.std  ('index')
+        xcount = xm.count('index')
 
-    xmean.to_netcdf(outfname %('RHO', str(region),'mean'))
-    xstd.to_netcdf(outfname %('RHO', str(region),'std'))
-    xcount.to_netcdf(outfname %('RHO', str(region),'count'))
+        xmean.to_netcdf(outfname %('RHO', str(region),'mean'))
+        xstd.to_netcdf(outfname %('RHO', str(region),'std'))
+        xcount.to_netcdf(outfname %('RHO', str(region),'count'))
