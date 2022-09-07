@@ -204,7 +204,9 @@ if __name__ == "__main__":
             salt  = ma.zeros((mask.shape))
             saltP = ma.zeros((mask.shape))
             w     = ma.zeros((mask.shape))
-
+            u     = ma.zeros((mask.shape))
+            v     = ma.zeros((mask.shape))
+            
             # Here we prepare the variables for storing 3D cubes info.
             biodic={}
             for vvv in biovar3Ddiaglist + biovar3Dptrclist:
@@ -317,6 +319,8 @@ if __name__ == "__main__":
                     salt[zi]  = ds["SALT"][tind, zi]
                     saltP[zi] = ds["SALT_P"][tind, zi]
                     w[zi]     = ds["W"][tind, zi]
+                    u[zi]     = ds["U"][tind, zi]
+                    v[zi]     = ds["V"][tind, zi]
 
                     # bio loop 3D Storing data from the cubes netcdf
                     for vvv in biovar3Ddiaglist + biovar3Dptrclist:
@@ -331,6 +335,8 @@ if __name__ == "__main__":
                     salt[zi]      = fillmask_kdtree(salt[zi] , msk, weights=wgt)
                     saltP[zi]     = fillmask_kdtree(saltP[zi], msk, weights=wgt)
                     w[zi]         = fillmask_kdtree(w[zi]    , msk, weights=wgt)
+                    u[zi]         = fillmask_kdtree(u[zi]    , msk, weights=wgt)
+                    v[zi]         = fillmask_kdtree(v[zi]    , msk, weights=wgt)
 
                     # bio loop 3D : Filling in the cube arrays
                     for vvv in biovar3Ddiaglist + biovar3Dptrclist:                        
@@ -347,6 +353,8 @@ if __name__ == "__main__":
                     salt2d  = ma.zeros((x_ext.size, ds.z.size))
                     salt2dP = ma.zeros((x_ext.size, ds.z.size))
                     w2d     = ma.zeros((x_ext.size, ds.z.size))
+                    u2d     = ma.zeros((x_ext.size, ds.z.size))
+                    v2d     = ma.zeros((x_ext.size, ds.z.size))
 
                     #bio loop 3D : initiate zero for slice arrays
                     for vvv in biovar3Ddiaglist + biovar3Dptrclist:
@@ -384,6 +392,8 @@ if __name__ == "__main__":
                 salt2d[:, zi]  = interp_to_2D(salt[zi] , x[0], y[:, 0], x_ext, y_ext)
                 salt2dP[:, zi] = interp_to_2D(saltP[zi], x[0], y[:, 0], x_ext, y_ext)
                 w2d[:, zi]     = interp_to_2D(w[zi]    , x[0], y[:, 0], x_ext, y_ext)
+                u2d[:, zi]     = interp_to_2D(u[zi]    , x[0], y[:, 0], x_ext, y_ext)
+                v2d[:, zi]     = interp_to_2D(v[zi]    , x[0], y[:, 0], x_ext, y_ext)
 
                 # bio loop 3D : Filling slice arrays with data interpollated from cube arrays
                 for vvv in biovar3Ddiaglist + biovar3Dptrclist:
@@ -402,6 +412,8 @@ if __name__ == "__main__":
             salt2d[:]  = ma.masked_where(mask2d == 0, ma.masked_array(salt2d , fill_value=fill_value_32))
             salt2dP[:] = ma.masked_where(mask2d == 0, ma.masked_array(salt2dP, fill_value=fill_value_32))
             w2d[:]     = ma.masked_where(mask2d == 0, ma.masked_array(w2d    , fill_value=fill_value_32))
+            u2d[:]     = ma.masked_where(mask2d == 0, ma.masked_array(u2d    , fill_value=fill_value_32))
+            v2d[:]     = ma.masked_where(mask2d == 0, ma.masked_array(v2d    , fill_value=fill_value_32))
 
             # bio loop 3D : Masking slice arrays
             for vvv in biovar3Ddiaglist + biovar3Dptrclist:
@@ -428,6 +440,8 @@ if __name__ == "__main__":
                     "salt"       : (dax, salt2d[newaxis]),
                     "saltP"      : (dax, salt2dP[newaxis]),
                     "w"          : (dax, w2d[newaxis]),
+                    "u"          : (dax, u2d[newaxis]),
+                    "v"          : (dax, v2d[newaxis]),
 
                     "mld"        : (("index", "norm_eddy_radius"), [mld1d]),
                     "lon"        : (("index", "norm_eddy_radius"), [lon1d]),
@@ -494,6 +508,8 @@ if __name__ == "__main__":
             salt_on_rho = transform(grid, ds_daily, "salt", target_rho_levels)
             saltP_on_rho = transform(grid, ds_daily, "saltP", target_rho_levels)
             w_on_rho = transform(grid, ds_daily, "w", target_rho_levels)
+            u_on_rho = transform(grid, ds_daily, "u", target_rho_levels)
+            v_on_rho = transform(grid, ds_daily, "v", target_rho_levels)
 
             # bio loop 3D -> rho levels
             for vvv in biovar3Ddiaglist + biovar3Dptrclist:
@@ -506,7 +522,9 @@ if __name__ == "__main__":
                 tempP_on_rho,
                 salt_on_rho,
                 saltP_on_rho,
-                w_on_rho]
+                w_on_rho,
+                u_on_rho,
+                v_on_rho]
 
             for vvv in biovar3Ddiaglist + biovar3Dptrclist:
                 listof_onrhos.append(biodic[vvv]['onrho'])
